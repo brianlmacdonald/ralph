@@ -1,0 +1,20 @@
+{
+  "name": "Ralph",
+  "version": "0.0.1",
+  "description": "Proxy Api Destroyer",
+  "main": "index.js",
+  "author": "Brian Macdonald",
+  "engines": {
+    "node": "10.13"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^10.12.2",
+    "eslint": "^5.8.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.1.6"
+  },
+  "scripts": {
+    "compile": "tsc -p ./"
+  }
+}

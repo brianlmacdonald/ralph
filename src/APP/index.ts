@@ -1,36 +1,61 @@
 import { Request, Response, NextFunction } from 'express-serve-static-core';
 const router = require('express').Router();
 const chalk = require('chalk')
-const fetch = require('node-fetch')
 const utils = require('../utils')
+
+const getRequest = utils.handoff('GET')
+const putRequest = utils.handoff('PUT')
+const postRequest = utils.handoff('POST')
+const deleteRequest = utils.handoff('DELETE')
 
 interface AsyncResponse extends Response {
   data: string;
   request: Object;
 }
 
+
+/* GET */
 router.get(
   '*',
   (req: Request, res: Response, next: NextFunction) => {
-    if (utils.randomNumber(9) <= -1) {
+    if (utils.randomNumber(10) <= 11) {
       return utils.errorRoulette(req, res, next)
     }
-    const url = req.query.host;
 
-    const headers = utils.makeHeaders(url, req)
-    return fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    .then((response: AsyncResponse) => {
-      return response.json()
-    })
-    .then((responseJson: Object) => {
-      console.log(chalk.cyan(`I can't complain. I got my bricks. I got my stump.`))
-      return res.send(responseJson);
-    })
-    .catch((err: Error) => console.error(err));
+    const { url, headers } = utils.getUrlAndHeaders(req)
+    return getRequest(res, utils.getUrlAndHeaders(req))
   }
 )
+
+/* POST */
+router.post('*', (req: Request, res: Response, next: NextFunction) => {
+  if (utils.randomNumber(10) <= 11) {
+    return utils.errorRoulette(req, res, next)
+  }
+
+  return postRequest(res, utils.getUrlAndHeaders(req))
+})
+
+/* DELETE */
+
+router.delete('*', (req: Request, res: Response, next: NextFunction) => {
+  if (utils.randomNumber(10) <= 11) {
+    return utils.errorRoulette(req, res, next)
+  }
+
+  return deleteRequest(res, utils.getUrlAndHeaders(req))
+})
+
+/* PUT */
+
+router.put('*', (req: Request, res: Response, next: NextFunction) => {
+  const { url, headers } = utils.getUrlAndHeaders()
+
+  if (utils.randomNumber(10) <= 11) {
+    return utils.errorRoulette(req, res, next)
+  }
+
+  return putRequest(res, utils.getUrlAndHeaders(req))
+})
 
 module.exports = router;

@@ -13,21 +13,41 @@
     "@types/morgan": "^1.7.35",
     "@types/node": "^10.12.2",
     "body-parser": "^1.18.3",
-    "chalk": "^2.4.1",
+    "chalk": "^2.4.2",
     "cors": "^2.8.5",
     "debug": "^4.1.0",
     "eslint": "^5.8.0",
     "express": "^4.16.4",
     "express-request-proxy": "^2.2.2",
     "finalhandler": "^1.1.1",
+    "js-yaml": "^3.12.1",
+    "json-stable-stringify-without-jsonify": "^1.0.1",
     "morgan": "^1.9.1",
     "node-fetch": "^2.2.1",
+    "strip-json-comments": "^2.0.1",
     "tslint": "^5.11.0",
     "typescript": "^3.1.6"
   },
   "scripts": {
     "compile": "tsc -p ./",
     "start": "node dist/server",
-    "compile:start": "yarn compile && yarn start"
+    "compile:start": "yarn compile && yarn start",
+    "test": "jest",
+    "compile:test": "yarn compile && yarn test"
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.12",
+    "@types/node-fetch": "^2.1.4",
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json",
+      "ts",
+      "tsx"
+    ]
   }
 }

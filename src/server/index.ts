@@ -37,6 +37,7 @@ module.exports = app
     console.error(err, '<== Error in finalHandler');
     finalHandler(req, res)(err);
   });
+
 const server = app.listen(port, 'localhost', () => {
   const { address, port } = server.address();
   console.log(chalk.yellow(`---- Ralph v0.0.1 ----`))

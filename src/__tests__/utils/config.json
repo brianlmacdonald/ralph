@@ -1,0 +1,6 @@
+{
+  "www.some-api.com": [
+    "some-session-token",
+    "Content-Type"
+  ]
+}

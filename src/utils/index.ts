@@ -1,6 +1,25 @@
 import { Request, Response, RequestHandler } from "express";
+import chalk from 'chalk'
+import fetch from 'node-fetch'
+import { existsSync } from 'fs'
 const ralphQuote = `I'm bad, and that's good.\nI will never be good, and that's not bad.\nThere's no one I'd rather be than me.`
-const chalk = require('chalk')
+
+/* .ralphrc config helpers */
+export const safeConfigImport = async (filePath: string): Promise<Object> => {
+  if(existsSync(filePath)) {
+    const config = await import(filePath)
+    return config.default
+  } else {
+    return {}
+  }
+}
+
+const config: any = safeConfigImport(`${process.cwd()}.ralphrc.json`)
+
+interface AsyncResponse extends Response {
+  data: string;
+  request: Object;
+}
 
 interface Options {
   message: string;
@@ -10,12 +29,14 @@ interface Options {
 
 const loggingResponse = (res: Response, options: Options): any => {
   console.log(chalk.magenta(`Sending back ${options.message}.`))
-  console.log(chalk.magenta(new Date()))
+  console.log(chalk.magenta(new Date().toDateString()))
   console.log(chalk.red(`* * * * * WRECKED * * * * * `))
   return res.status(options.code).json(options.json)
 }
 
-const errorRoulette: RequestHandler = (req, res, next):any => {
+/* WRECKING UTILS */
+
+export const errorRoulette: RequestHandler = (req, res, next):any => {
   const randomNumber: Number = Math.round(Math.random() * 3);
   console.log(chalk.red(`* * * * * WRECKED * * * * * `))
   console.log(chalk.red(`${ralphQuote}'`))
@@ -29,7 +50,7 @@ const errorRoulette: RequestHandler = (req, res, next):any => {
         errors: [
           {
             status: 404,
-            message: 'Ralph: standard.',
+            message: 'Ralph: Four oh Four!',
             title: 'Ralph: Not found.'
           }
         ]
@@ -63,7 +84,7 @@ const errorRoulette: RequestHandler = (req, res, next):any => {
         errors: [
           {
             status: 502,
-            message: 'Ralph: bad gateway.',
+            message: 'error.',
             title: 'Ralph: bad gateway.',
           },
         ],
@@ -74,22 +95,49 @@ const errorRoulette: RequestHandler = (req, res, next):any => {
   }
 }
 
-const makeHeaders = (url: string, req: Request): Object => {
-  const headers: Object = { }
-  if (url.includes('dashboard')) {
-    //@ts-ignore
-    headers['xo-member-token'] = req.get('xo-member-token')
-    //@ts-ignore
-    headers['Content-Type'] = req.get('Content-Type')
-  } else if (url.includes('qa-api.weddings')) {
-    //@ts-ignore
-    headers['Application-Type'] = req.get('Application-Type')
-    //@ts-ignore
-    headers['membership-session-token'] = req.get('membership-session-token')
+/* REQUEST BUILDING UTILS */
+
+const getApiDomain = (host: string) => {
+  return new URL(host).hostname;
+}
+
+export const getUrlAndHeaders = (req: Request): Object => {
+  const host: string = req.query.host
+  const headers: object = parseHeaders(host, req)
+  return { host, headers}
+}
+
+export const handoff = (method: string) => (res: Response, { url, headers }: { url: string, headers: any }) => {
+  return fetch(url, {
+    method,
+    headers,
+  })
+  .then((response: any) => {
+    return response.json()
+  })
+  .then((responseJson: Object) => {
+    return res.send(responseJson)
+  })
+  .catch((err: Error) => console.error(err))
+}
+interface HeaderAcc {
+  [key: string]: any
+}
+
+export const findAndSetHeaders = (req: Request) => (headerObject: HeaderAcc, headerKey: string):any => {
+  if(!req.get(headerKey)) {
+    return headerObject
   }
-  return headers
+  return headerObject[headerKey] = req.get(headerKey)
+}
+
+
+export const parseHeaders = (hostname: string, req: Request): object => {
+  const headerKeys: Array<string> = config[getApiDomain(hostname)]
+  const findAndSetHeadersWithRequest = findAndSetHeaders(req)
+  const headerAcc: HeaderAcc = {}
+
+  return headerKeys.reduce(findAndSetHeadersWithRequest, headerAcc)
 }
 
 const randomNumber = (num: number): number => Math.round(Math.random() * num)
-
-module.exports = { makeHeaders, randomNumber, errorRoulette }
